@@ -1,55 +1,50 @@
-# 💰 Expense Tracker
+# 💰 Expense Tracker (Field Project)
 
-A full-stack web application to track daily expenses, manage budgets, and visualize spending.
+A full-stack web application to track daily expenses, manage budgets, and monitor spending efficiently.
+
+## 📌 Project Description
+
+This application allows users to record their daily expenses, categorize them, and analyze their spending patterns through a simple dashboard interface.
+
+# 👥 Team Members
+
+* Ch. Renuka Bhargavi(241FA04282)
+* U.l. Pravallika(241FA04708)
+* J. Monika(241FA04772)
+* B. Rajeswari(241FA04B32)
 
 ## 🚀 Features
 
-* Add, edit, delete expenses
+* Add, edit, and delete expenses
 * Categorize transactions (Food, Travel, etc.)
 * Monthly budget tracking
-* Dashboard with analytics
-* User authentication (login/signup)
-
+* Dashboard view for expenses
+* User authentication (Login/Signup)
+  
 ## 🛠️ Tech Stack
 
 * Frontend: HTML, CSS, JavaScript
 * Backend: Node.js, Express.js
-* Database: (MongoDB)
+* Database: MongoDB
 
 ## 📂 Project Structure
 
-* `/frontend` → UI (HTML, CSS, JS)
-* `/backend` → API & server
+* `frontend/` → User Interface (HTML, CSS, JS)
+* `backend/` → Server, APIs, and database handling
 
 ## ⚙️ Setup Instructions
 
-### 1. Clone repo
-
-git clone https://github.com/your-username/ExpenseTracker.git
-
+### 1. Clone the repository
+git clone https://github.com/renukabhargavi901-jpg/ExpenseTracker.git
 ### 2. Install dependencies
-
 cd backend
 npm install
-
-### 3. Run backend
-
+### 3. Run the backend server
 npm start
+### 4. Run the frontend
+Open `frontend/index.html` in your browser
 
-### 4. Open frontend
+## 📅 Academic Information
 
-Open `index.html` in browser
+This project is developed as part of a Field Project submission.
 
-## 📸 Screenshots
-
-(Add screenshots here)
-
-## 🌟 Future Improvements
-
-* Add charts (Pie/Bar)
-* Mobile responsive UI
-* Deploy online
-
-## 👩‍💻 Author
-
-Renuka
