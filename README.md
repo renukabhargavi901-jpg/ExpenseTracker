@@ -9,9 +9,9 @@ This application allows users to record their daily expenses, categorize them, a
 # 👥 Team Members
 
 * Ch. Renuka Bhargavi(241FA04282)
-* U.l. Pravallika(241FA04708)
+* U.L. Pravallika(241FA04708)
 * J. Monika(241FA04772)
-* B. Rajeswari(241FA04B32)
+* P. Rajeswari(241FA04B32)
 
 ## 🚀 Features
 
