@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Expense Tracker Dashboard — Manage your income, expenses, and balance."/>
+  <title>Dashboard — Expense Tracker</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    .stat-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 28px; }
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+    .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .filter-bar select { flex: 1; min-width: 140px; }
+    .amount-income  { color: var(--success); font-weight: 700; }
+    .amount-expense { color: var(--danger);  font-weight: 700; }
+    .action-btns { display: flex; gap: 6px; }
+    .type-tabs { display: flex; gap: 0; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 20px; }
+    .type-tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-size: 0.88rem; font-weight: 600; transition: all var(--transition-fast); background: transparent; border: none; color: var(--text-muted); }
+    .type-tab.active { background: var(--primary-light); color: #fff; }
+    @media (max-width: 1100px) { .dashboard-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 700px) { .stat-cards { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body class="bg-mesh">
+<div id="toast-container"></div>
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <a href="index.html" class="sidebar-logo">
+    <div class="logo-icon"><i class="fa-solid fa-wallet"></i></div>
+    <div>
+      <div class="logo-text">ExpenseTracker</div>
+      <div class="logo-sub">Smart Finances</div>
+    </div>
+  </a>
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-link" data-page="dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="analytics.html" class="nav-link" data-page="analytics"><i class="fa-solid fa-chart-pie"></i> Analytics</a>
+      <a href="budget.html"    class="nav-link" data-page="budget"><i class="fa-solid fa-bullseye"></i> Budget Goals</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Account</div>
+      <a href="#" class="nav-link" id="logoutBtn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar" id="sidebarAvatar">U</div>
+      <div>
+        <div class="user-name"  id="sidebarUserName">Loading...</div>
+        <div class="user-email" id="sidebarUserEmail"></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="app-layout">
+  <div class="main-content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:14px">
+        <button class="hamburger" id="hamburger" aria-label="Toggle menu"><i class="fa-solid fa-bars"></i></button>
+        <div class="topbar-title"><i class="fa-solid fa-gauge-high" style="color:var(--accent);margin-right:8px"></i>Dashboard</div>
+      </div>
+      <div class="topbar-right">
+        <span id="topbarDate" style="font-size:0.8rem;color:var(--text-muted)"></span>
+        <button class="btn btn-primary btn-sm" id="openAddModal">
+          <i class="fa-solid fa-plus"></i> Add Transaction
+        </button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="page-content">
+
+      <!-- Stat cards -->
+      <div class="stat-cards">
+        <div class="stat-card income anim-slideUp anim-delay-1">
+          <div class="stat-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
+          <div class="stat-info">
+            <div class="stat-label">Total Income</div>
+            <div class="stat-value" style="color:var(--success)" id="statIncome">₹0</div>
+          </div>
+        </div>
+        <div class="stat-card expense anim-slideUp anim-delay-2">
+          <div class="stat-icon"><i class="fa-solid fa-arrow-trend-down"></i></div>
+          <div class="stat-info">
+            <div class="stat-label">Total Expenses</div>
+            <div class="stat-value" style="color:var(--danger)" id="statExpense">₹0</div>
+          </div>
+        </div>
+        <div class="stat-card balance anim-slideUp anim-delay-3">
+          <div class="stat-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+          <div class="stat-info">
+            <div class="stat-label">Balance</div>
+            <div class="stat-value" style="color:var(--gold)" id="statBalance">₹0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dashboard grid -->
+      <div class="dashboard-grid">
+
+        <!-- Transactions table -->
+        <div class="card anim-slideUp anim-delay-2">
+          <div class="section-header">
+            <h2><i class="fa-solid fa-list" style="color:var(--accent);margin-right:8px"></i>Transactions</h2>
+            <div class="filter-bar">
+              <select class="form-control btn-sm" id="filterType" style="width:auto;padding:7px 12px;font-size:0.82rem">
+                <option value="">All Types</option>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+              </select>
+              <select class="form-control btn-sm" id="filterCategory" style="width:auto;padding:7px 12px;font-size:0.82rem">
+                <option value="">All Categories</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Category</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="transactionBody">
+                <tr><td colspan="6"><div class="empty-state"><i class="fa-solid fa-receipt"></i><p>No transactions yet</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Recent mini summary -->
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div class="card anim-slideUp anim-delay-3">
+            <h3 style="margin-bottom:16px"><i class="fa-solid fa-clock-rotate-left" style="color:var(--accent);margin-right:8px"></i>Recent Activity</h3>
+            <div id="recentList" style="display:flex;flex-direction:column;gap:10px">
+              <div class="empty-state" style="padding:30px 10px"><i class="fa-solid fa-receipt"></i><p>No recent activity</p></div>
+            </div>
+          </div>
+          <div class="card anim-slideUp anim-delay-4">
+            <h3 style="margin-bottom:16px"><i class="fa-solid fa-tags" style="color:var(--gold);margin-right:8px"></i>Top Categories</h3>
+            <div id="topCategories"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Add / Edit Transaction Modal -->
+<div class="modal-overlay" id="transactionModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="modalTitle"><i class="fa-solid fa-plus" style="color:var(--accent);margin-right:8px"></i>Add Transaction</h3>
+      <button class="modal-close" id="closeModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="transactionForm" novalidate>
+      <input type="hidden" id="editId"/>
+      <!-- Type tabs -->
+      <div class="type-tabs">
+        <button type="button" class="type-tab active" data-type="income" id="tabIncome">
+          <i class="fa-solid fa-arrow-up" style="color:var(--success)"></i> Income
+        </button>
+        <button type="button" class="type-tab" data-type="expense" id="tabExpense">
+          <i class="fa-solid fa-arrow-down" style="color:var(--danger)"></i> Expense
+        </button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <div class="input-group">
+          <i class="fa-solid fa-tag input-icon"></i>
+          <select id="txCategory" class="form-control"></select>
+        </div>
+        <span class="form-error" id="categoryError"></span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Amount (₹)</label>
+        <div class="input-group">
+          <i class="fa-solid fa-indian-rupee-sign input-icon"></i>
+          <input type="number" id="txAmount" class="form-control" placeholder="0.00" min="0.01" step="0.01"/>
+        </div>
+        <span class="form-error" id="amountError"></span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description (optional)</label>
+        <div class="input-group">
+          <i class="fa-solid fa-pen input-icon"></i>
+          <input type="text" id="txDesc" class="form-control" placeholder="What was this for?"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <div class="input-group">
+          <i class="fa-solid fa-calendar input-icon"></i>
+          <input type="date" id="txDate" class="form-control"/>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="txSubmitBtn">
+        <i class="fa-solid fa-check"></i> Save Transaction
+      </button>
+    </form>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

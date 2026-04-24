@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Expense Tracker Budget Goals — Set and track your financial savings goals."/>
+  <title>Budget Goals — Expense Tracker</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    .budget-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 4px;
+    }
+    .budget-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      backdrop-filter: blur(16px);
+      transition: all var(--transition);
+      animation: slideUp 0.4s ease both;
+    }
+    .budget-card:hover { border-color: var(--border-strong); transform: translateY(-3px); box-shadow: var(--shadow-md); }
+    .budget-card.achieved { border-color: rgba(76,175,130,0.5); }
+    .budget-card.expired  { border-color: rgba(245,158,11,0.5); }
+    .budget-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+    .budget-name { font-weight: 700; font-size: 1rem; font-family: 'Poppins', sans-serif; }
+    .budget-meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+    .budget-amounts { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+    .budget-current { font-size: 1.3rem; font-weight: 700; font-family: 'Poppins', sans-serif; color: var(--accent-light); }
+    .budget-target  { font-size: 0.82rem; color: var(--text-muted); }
+    .budget-pct     { font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); }
+    .budget-deadline { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--text-muted); margin-top: 12px; }
+    .budget-actions { display: flex; gap: 6px; margin-top: 14px; }
+    .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: var(--radius-full); font-size: 0.72rem; font-weight: 700; }
+    .status-achieved { background: rgba(76,175,130,0.15); color: var(--success); }
+    .status-expired  { background: rgba(245,158,11,0.15); color: var(--warning); }
+    .status-active   { background: rgba(96,165,250,0.15); color: var(--info); }
+
+    /* Popup */
+    .popup-content { max-width: 380px; }
+    .popup-achieved { border-color: rgba(76,175,130,0.5); }
+    .popup-expired  { border-color: rgba(245,158,11,0.5); }
+  </style>
+</head>
+<body class="bg-mesh">
+<div id="toast-container"></div>
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+<!-- Celebration / Warning Popup -->
+<div class="popup-overlay" id="budgetPopup">
+  <div class="popup-box" id="popupBox">
+    <div class="popup-emoji" id="popupEmoji">🎉</div>
+    <h2 id="popupTitle">Goal Achieved!</h2>
+    <p id="popupMsg" style="margin:12px 0 24px"></p>
+    <button class="btn btn-primary" onclick="document.getElementById('budgetPopup').classList.remove('active')">
+      Awesome! <i class="fa-solid fa-check"></i>
+    </button>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <a href="index.html" class="sidebar-logo">
+    <div class="logo-icon"><i class="fa-solid fa-wallet"></i></div>
+    <div>
+      <div class="logo-text">ExpenseTracker</div>
+      <div class="logo-sub">Smart Finances</div>
+    </div>
+  </a>
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-link" data-page="dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="analytics.html" class="nav-link" data-page="analytics"><i class="fa-solid fa-chart-pie"></i> Analytics</a>
+      <a href="budget.html"    class="nav-link" data-page="budget"><i class="fa-solid fa-bullseye"></i> Budget Goals</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Account</div>
+      <a href="#" class="nav-link" id="logoutBtn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar" id="sidebarAvatar">U</div>
+      <div>
+        <div class="user-name"  id="sidebarUserName">Loading...</div>
+        <div class="user-email" id="sidebarUserEmail"></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="app-layout">
+  <div class="main-content">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:14px">
+        <button class="hamburger" id="hamburger" aria-label="Toggle menu"><i class="fa-solid fa-bars"></i></button>
+        <div class="topbar-title"><i class="fa-solid fa-bullseye" style="color:var(--accent);margin-right:8px"></i>Budget Goals</div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary btn-sm" id="openBudgetModal">
+          <i class="fa-solid fa-plus"></i> New Goal
+        </button>
+      </div>
+    </header>
+
+    <main class="page-content">
+
+      <!-- Balance context banner -->
+      <div class="card anim-slideUp anim-delay-1" style="margin-bottom:24px;background:linear-gradient(135deg,rgba(75,44,77,0.6),rgba(107,63,110,0.4))">
+        <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:4px">Your Current Balance</div>
+            <div style="font-size:2rem;font-weight:800;font-family:'Poppins',sans-serif;color:var(--gold)" id="balanceBanner">₹0.00</div>
+          </div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap">
+            <div style="text-align:center">
+              <div style="font-size:0.75rem;color:var(--text-muted)">Active Goals</div>
+              <div style="font-size:1.4rem;font-weight:700;color:var(--info)" id="bannerActive">0</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:0.75rem;color:var(--text-muted)">Achieved</div>
+              <div style="font-size:1.4rem;font-weight:700;color:var(--success)" id="bannerAchieved">0</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:0.75rem;color:var(--text-muted)">Expired</div>
+              <div style="font-size:1.4rem;font-weight:700;color:var(--warning)" id="bannerExpired">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Budget cards -->
+      <div class="section-header">
+        <h2><i class="fa-solid fa-bullseye" style="color:var(--accent);margin-right:8px"></i>Your Budget Goals</h2>
+      </div>
+      <div class="budget-grid" id="budgetGrid">
+        <div style="grid-column:1/-1"><div class="empty-state"><i class="fa-solid fa-bullseye"></i><p>No budget goals yet. Create your first one!</p></div></div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Add / Edit Budget Modal -->
+<div class="modal-overlay" id="budgetModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="budgetModalTitle"><i class="fa-solid fa-plus" style="color:var(--accent);margin-right:8px"></i>New Budget Goal</h3>
+      <button class="modal-close" id="closeBudgetModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="budgetForm" novalidate>
+      <input type="hidden" id="budgetEditId"/>
+      <div class="form-group">
+        <label class="form-label">Goal Name</label>
+        <div class="input-group">
+          <i class="fa-solid fa-bullseye input-icon"></i>
+          <input type="text" id="budgetName" class="form-control" placeholder="e.g. Emergency Fund, Vacation"/>
+        </div>
+        <span class="form-error" id="budgetNameError"></span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Target Amount (₹)</label>
+        <div class="input-group">
+          <i class="fa-solid fa-indian-rupee-sign input-icon"></i>
+          <input type="number" id="budgetAmount" class="form-control" placeholder="10000" min="1"/>
+        </div>
+        <span class="form-error" id="budgetAmountError"></span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Expected Completion Date</label>
+        <div class="input-group">
+          <i class="fa-solid fa-calendar-days input-icon"></i>
+          <input type="date" id="budgetDeadline" class="form-control"/>
+        </div>
+        <span class="form-error" id="budgetDeadlineError"></span>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="budgetSubmitBtn">
+        <i class="fa-solid fa-check"></i> Save Goal
+      </button>
+    </form>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/budget.js"></script>
+</body>
+</html>

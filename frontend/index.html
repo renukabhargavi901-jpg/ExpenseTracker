@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Expense Tracker — Smart financial management. Track income, expenses, and budgets with beautiful visuals."/>
+  <title>Expense Tracker — Smart Money Management</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    /* ── Landing-specific styles ── */
+    .landing { min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* Landing background */
+    .hero-bg {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 90% 80% at 15% 5%,  rgba(107,63,110,0.5) 0%, transparent 55%),
+        radial-gradient(ellipse 70% 70% at 85% 95%, rgba(75,44,77,0.6)  0%, transparent 50%),
+        radial-gradient(ellipse 50% 50% at 70% 20%, rgba(192,132,188,0.12) 0%, transparent 45%),
+        #0E0810;
+    }
+
+    /* Lamp element */
+    .lamp {
+      position: absolute;
+      top: 20%;
+      right: 10%;
+      width: 120px;
+      height: 120px;
+      z-index: 1;
+    }
+    .lamp svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 20px rgba(192,132,188,0.5));
+    }
+
+    /* Navbar */
+    .navbar {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 60px;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .nav-brand-icon {
+      width: 46px; height: 46px;
+      background: linear-gradient(135deg, var(--primary-light), var(--accent));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; color: #fff;
+      box-shadow: 0 4px 15px var(--primary-glow);
+    }
+    .nav-brand-text { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.15rem; color: var(--text-primary); }
+    .nav-actions { display: flex; gap: 12px; }
+
+    /* Hero */
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 24px 60px;
+      position: relative; z-index: 1;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(192,132,188,0.12);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-full);
+      padding: 6px 18px;
+      font-size: 0.8rem;
+      color: var(--accent-light);
+      margin-bottom: 28px;
+      animation: slideDown 0.6s ease both;
+    }
+    .hero-badge i { color: var(--gold); }
+    .hero h1 {
+      font-size: clamp(2.8rem, 7vw, 5rem);
+      background: linear-gradient(135deg, #fff 30%, var(--accent-light) 70%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 22px;
+      animation: slideUp 0.7s ease 0.1s both;
+      line-height: 1.15;
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto 36px;
+      animation: slideUp 0.7s ease 0.2s both;
+      line-height: 1.7;
+    }
+    .hero-cta {
+      display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+      animation: slideUp 0.7s ease 0.3s both;
+    }
+    .hero-stats {
+      display: flex; gap: 40px; flex-wrap: wrap; justify-content: center;
+      margin-top: 60px;
+      animation: fadeIn 0.8s ease 0.5s both;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat-value {
+      font-size: 2rem; font-weight: 800; font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, var(--accent-light), var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+
+    /* Floating UI preview cards */
+    .preview-area {
+      position: relative; z-index: 1;
+      padding: 0 24px 80px;
+      display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
+    }
+    .preview-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      backdrop-filter: blur(16px);
+      min-width: 200px;
+      animation: float 4s ease-in-out infinite;
+      transition: all var(--transition);
+    }
+    .preview-card:nth-child(2) { animation-delay: -1.5s; }
+    .preview-card:nth-child(3) { animation-delay: -3s; }
+    .preview-card:hover { transform: translateY(-8px) !important; box-shadow: var(--shadow-lg), 0 0 30px var(--primary-glow); }
+    .preview-card-icon { font-size: 1.6rem; margin-bottom: 10px; }
+    .preview-card-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 4px; }
+    .preview-card-value { font-size: 1.5rem; font-weight: 700; font-family: 'Poppins', sans-serif; }
+
+    /* Features */
+    .features {
+      position: relative; z-index: 1;
+      padding: 60px 60px 80px;
+    }
+    .features-label {
+      text-align: center;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .features h2 {
+      text-align: center;
+      margin-bottom: 50px;
+      background: linear-gradient(135deg, var(--text-primary), var(--accent-light));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 22px;
+    }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      backdrop-filter: blur(12px);
+      transition: all var(--transition);
+      cursor: default;
+    }
+    .feature-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-md), 0 0 25px var(--primary-glow);
+    }
+    .feature-icon {
+      width: 52px; height: 52px;
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 18px;
+      background: linear-gradient(135deg, rgba(75,44,77,0.5), rgba(107,63,110,0.3));
+      border: 1px solid var(--border);
+    }
+    .feature-card h3 { font-size: 1rem; margin-bottom: 8px; }
+    .feature-card p  { font-size: 0.85rem; line-height: 1.6; }
+
+    /* Footer */
+    .landing-footer {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 16px 20px; }
+      .features { padding: 40px 20px 60px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="hero-bg"></div>
+  <div id="toast-container"></div>
+
+  <div class="landing">
+    <!-- Navbar -->
+    <nav class="navbar">
+      <a href="index.html" class="nav-brand">
+        <div class="nav-brand-icon"><i class="fa-solid fa-wallet"></i></div>
+        <span class="nav-brand-text">ExpenseTracker</span>
+      </a>
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-outline">Login</a>
+        <a href="signup.html" class="btn btn-primary">Get Started</a>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="lamp">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="lampGlow" cx="50%" cy="30%" r="50%">
+              <stop offset="0%" stop-color="#ffd700" stop-opacity="0.8"/>
+              <stop offset="100%" stop-color="#ff6b35" stop-opacity="0.2"/>
+            </radialGradient>
+          </defs>
+          <!-- Lamp base -->
+          <rect x="45" y="80" width="10" height="15" fill="#8b4513" rx="2"/>
+          <!-- Lamp stand -->
+          <rect x="48" y="60" width="4" height="20" fill="#c0c0c0"/>
+          <!-- Lamp shade -->
+          <ellipse cx="50" cy="35" rx="25" ry="15" fill="url(#lampGlow)"/>
+          <!-- Lamp bulb -->
+          <circle cx="50" cy="50" r="8" fill="#fff" opacity="0.9"/>
+          <circle cx="50" cy="50" r="5" fill="#ffd700"/>
+        </svg>
+      </div>
+      <div class="hero-badge"><i class="fa-solid fa-star"></i> Smart Financial Management</div>
+      <h1>Track Every Rupee,<br/>Build Your Wealth</h1>
+      <p>A beautifully designed expense tracker that helps you understand your spending, manage budgets, and achieve your financial goals with ease.</p>
+      <div class="hero-cta">
+        <a href="signup.html" class="btn btn-primary btn-lg"><i class="fa-solid fa-rocket"></i> Start for Free</a>
+        <a href="login.html" class="btn btn-outline btn-lg"><i class="fa-solid fa-arrow-right-to-bracket"></i> Login</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-value">6+</div>
+          <div class="hero-stat-label">Smart Pages</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">15+</div>
+          <div class="hero-stat-label">Categories</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">100%</div>
+          <div class="hero-stat-label">Secure Auth</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">Dark</div>
+          <div class="hero-stat-label">UI Theme</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Preview Cards -->
+    <div class="preview-area">
+      <div class="preview-card">
+        <div class="preview-card-icon" style="color:var(--success)">💰</div>
+        <div class="preview-card-title">Total Income</div>
+        <div class="preview-card-value" style="color:var(--success)">₹48,500</div>
+      </div>
+      <div class="preview-card">
+        <div class="preview-card-icon" style="color:var(--danger)">📉</div>
+        <div class="preview-card-title">Expenses</div>
+        <div class="preview-card-value" style="color:var(--danger)">₹21,200</div>
+      </div>
+      <div class="preview-card">
+        <div class="preview-card-icon" style="color:var(--gold)">⚖️</div>
+        <div class="preview-card-title">Balance</div>
+        <div class="preview-card-value" style="color:var(--gold)">₹27,300</div>
+      </div>
+    </div>
+
+    <!-- Features section -->
+    <section class="features">
+      <div class="features-label">Everything you need</div>
+      <h2>Powerful Features</h2>
+      <div class="features-grid">
+        <div class="feature-card anim-slideUp anim-delay-1">
+          <div class="feature-icon"><i class="fa-solid fa-chart-pie" style="color:var(--accent)"></i></div>
+          <h3>Analytics & Charts</h3>
+          <p>Interactive pie charts and bar graphs to visualize your spending patterns by category.</p>
+        </div>
+        <div class="feature-card anim-slideUp anim-delay-2">
+          <div class="feature-icon"><i class="fa-solid fa-bullseye" style="color:var(--gold)"></i></div>
+          <h3>Budget Goals</h3>
+          <p>Set savings goals with deadlines. Get notified when you achieve them or miss the target.</p>
+        </div>
+        <div class="feature-card anim-slideUp anim-delay-3">
+          <div class="feature-icon"><i class="fa-solid fa-shield-halved" style="color:var(--success)"></i></div>
+          <h3>Secure Auth</h3>
+          <p>JWT-based authentication keeps your financial data private and secure at all times.</p>
+        </div>
+        <div class="feature-card anim-slideUp anim-delay-4">
+          <div class="feature-icon"><i class="fa-solid fa-tags" style="color:var(--info)"></i></div>
+          <h3>Smart Categories</h3>
+          <p>Organize transactions across 15+ categories including Food, Shopping, Healthcare & more.</p>
+        </div>
+        <div class="feature-card anim-slideUp anim-delay-1">
+          <div class="feature-icon"><i class="fa-solid fa-mobile-screen" style="color:var(--accent-light)"></i></div>
+          <h3>Fully Responsive</h3>
+          <p>Optimized for mobile and desktop. Manage finances on any device, any time.</p>
+        </div>
+        <div class="feature-card anim-slideUp anim-delay-2">
+          <div class="feature-icon"><i class="fa-solid fa-bell" style="color:var(--warning)"></i></div>
+          <h3>Smart Alerts</h3>
+          <p>Real-time notifications for budget milestones, goal achievements and deadline warnings.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="landing-footer">
+      <p>&copy; 2024 ExpenseTracker. Crafted with <i class="fa-solid fa-heart" style="color:var(--accent)"></i> for smarter finances.</p>
+    </footer>
+  </div>
+
+  <script>
+    // Redirect if already logged in
+    if (localStorage.getItem('et_token')) {
+      window.location.href = 'dashboard.html';
+    }
+
+    // Animate feature cards on scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.style.animationPlayState = 'running'; });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.anim-slideUp').forEach(el => {
+      el.style.animationPlayState = 'paused';
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>

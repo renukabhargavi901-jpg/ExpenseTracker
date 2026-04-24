@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Login to your Expense Tracker account and manage your finances."/>
+  <title>Login — Expense Tracker</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    .auth-page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .auth-left {
+      background:
+        radial-gradient(ellipse 80% 80% at 80% 20%, rgba(192,132,188,0.4) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 60% at 20% 80%, rgba(75,44,77,0.7) 0%, transparent 50%),
+        var(--primary-dark);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 60px 50px;
+      position: relative; overflow: hidden;
+    }
+    .auth-left::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c084bc' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .auth-left-content { position: relative; z-index: 1; text-align: center; max-width: 340px; }
+    .auth-left-icon {
+      width: 80px; height: 80px;
+      background: linear-gradient(135deg, var(--accent), var(--primary-light));
+      border-radius: 22px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem; color: #fff;
+      margin: 0 auto 28px;
+      box-shadow: 0 8px 30px var(--accent-glow);
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+    .auth-left h2 { font-size: 1.9rem; margin-bottom: 14px; color: #fff; }
+    .auth-left p { color: rgba(255,255,255,0.7); line-height: 1.7; }
+    .auth-orb-1 {
+      position: absolute; bottom: -60px; right: -60px;
+      width: 200px; height: 200px; border-radius: 50%;
+      background: var(--accent); opacity: 0.15; filter: blur(50px);
+    }
+
+    /* Floating card preview on left */
+    .login-preview-cards { margin-top: 32px; display: flex; flex-direction: column; gap: 10px; }
+    .login-preview-row {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+    }
+    .login-preview-row i { color: var(--accent-light); width: 20px; text-align: center; }
+    .login-preview-label { font-size: 0.82rem; color: rgba(255,255,255,0.7); flex: 1; }
+    .login-preview-value { font-size: 0.88rem; font-weight: 600; color: #fff; }
+
+    .auth-right {
+      background: var(--bg-deep);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 60px 50px;
+    }
+    .auth-box { width: 100%; max-width: 380px; animation: slideUp 0.5s ease both; }
+    .auth-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--text-muted); font-size: 0.85rem;
+      text-decoration: none; margin-bottom: 28px;
+      transition: color var(--transition-fast);
+    }
+    .auth-back:hover { color: var(--accent); }
+    .auth-box h1 { font-size: 1.8rem; margin-bottom: 6px; }
+    .auth-box .subtitle { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 32px; }
+    .auth-box .subtitle a { color: var(--accent); }
+    .password-toggle {
+      position: absolute; right: 14px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      color: var(--text-muted); cursor: pointer; font-size: 0.95rem;
+      transition: color var(--transition-fast);
+    }
+    .password-toggle:hover { color: var(--accent); }
+    .forgot-link { font-size: 0.82rem; color: var(--accent); float: right; margin-bottom: 8px; }
+
+    @media (max-width: 768px) {
+      .auth-page { grid-template-columns: 1fr; }
+      .auth-left { display: none; }
+      .auth-right { padding: 40px 24px; }
+    }
+  </style>
+</head>
+<body>
+<div id="toast-container"></div>
+<div class="auth-page">
+
+  <!-- Left branding -->
+  <div class="auth-left">
+    <div class="auth-orb-1"></div>
+    <div class="auth-left-content">
+      <div class="auth-left-icon"><i class="fa-solid fa-chart-line"></i></div>
+      <h2>Welcome Back!</h2>
+      <p>Your financial dashboard is waiting. Pick up right where you left off.</p>
+      <div class="login-preview-cards">
+        <div class="login-preview-row">
+          <i class="fa-solid fa-arrow-trend-up"></i>
+          <span class="login-preview-label">Total Income</span>
+          <span class="login-preview-value" style="color:var(--success)">₹48,500</span>
+        </div>
+        <div class="login-preview-row">
+          <i class="fa-solid fa-arrow-trend-down"></i>
+          <span class="login-preview-label">Total Expenses</span>
+          <span class="login-preview-value" style="color:var(--danger)">₹21,200</span>
+        </div>
+        <div class="login-preview-row">
+          <i class="fa-solid fa-scale-balanced"></i>
+          <span class="login-preview-label">Balance</span>
+          <span class="login-preview-value" style="color:var(--gold)">₹27,300</span>
+        </div>
+        <div class="login-preview-row">
+          <i class="fa-solid fa-bullseye"></i>
+          <span class="login-preview-label">Budget Goals</span>
+          <span class="login-preview-value" style="color:var(--accent-light)">3 Active</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right form -->
+  <div class="auth-right">
+    <div class="auth-box">
+      <a href="index.html" class="auth-back"><i class="fa-solid fa-arrow-left"></i> Back to home</a>
+      <h1>Sign In</h1>
+      <p class="subtitle">New here? <a href="signup.html">Create an account</a></p>
+
+      <form id="loginForm" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <div class="input-group">
+            <i class="fa-solid fa-envelope input-icon"></i>
+            <input type="email" id="email" class="form-control" placeholder="you@example.com" autocomplete="email"/>
+          </div>
+          <span class="form-error" id="emailError"></span>
+        </div>
+
+        <div class="form-group">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <label class="form-label" for="password" style="margin:0">Password</label>
+            <a href="#" class="forgot-link" style="float:none">Forgot password?</a>
+          </div>
+          <div class="input-group" style="position:relative">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="password" class="form-control" placeholder="Your password" autocomplete="current-password"/>
+            <button type="button" class="password-toggle" id="togglePwd" aria-label="Toggle password">
+              <i class="fa-solid fa-eye" id="eyeIcon"></i>
+            </button>
+          </div>
+          <span class="form-error" id="passwordError"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="submitBtn" style="margin-top:8px">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/toast.js"></script>
+<script>
+  if (localStorage.getItem('et_token')) window.location.href = 'dashboard.html';
+
+  document.getElementById('togglePwd').addEventListener('click', () => {
+    const inp = document.getElementById('password');
+    const icon = document.getElementById('eyeIcon');
+    if (inp.type === 'password') { inp.type = 'text'; icon.className = 'fa-solid fa-eye-slash'; }
+    else { inp.type = 'password'; icon.className = 'fa-solid fa-eye'; }
+  });
+
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg; el.classList.toggle('show', !!msg);
+    const input = document.getElementById(id.replace('Error',''));
+    if (input) input.classList.toggle('error', !!msg);
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    showError('emailError', ''); showError('passwordError', '');
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    let valid = true;
+    if (!email) { showError('emailError', 'Email is required'); valid = false; }
+    if (!password) { showError('passwordError', 'Password is required'); valid = false; }
+    if (!valid) return;
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner" style="width:18px;height:18px;border-width:2px"></span> Signing in...';
+
+    try {
+      const res = await api.post('/api/auth/login', { email, password });
+      if (res.success) {
+        localStorage.setItem('et_token', res.token);
+        localStorage.setItem('et_user', JSON.stringify(res.user));
+        showToast('Welcome back!', `Logged in as ${res.user.name}`, 'success');
+        setTimeout(() => window.location.href = 'dashboard.html', 900);
+      } else {
+        showToast('Login Failed', res.message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In';
+      }
+    } catch (err) {
+      showToast('Error', err.message || 'Server error', 'error');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In';
+    }
+  });
+</script>
+</body>
+</html>
